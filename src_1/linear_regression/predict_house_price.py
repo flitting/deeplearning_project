@@ -1,3 +1,7 @@
+"""
+EXERCISE 1A
+"""
+
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -22,6 +26,7 @@ def main():
     mean = np.mean(dataset[:, :-1], axis=0)
     std = np.std(dataset[:, :-1], axis=0)
     dataset[:, :-1] = (dataset[:, :-1] - mean) / std
+    # add one 1 column to express bias.
     bias_column = np.ones(dataset.shape[0]).reshape(-1, 1)
     dataset = np.hstack((bias_column, dataset))
 
