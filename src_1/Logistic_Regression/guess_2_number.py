@@ -1,3 +1,5 @@
+from typing import Callable
+
 import torch
 from torch.utils.data import Dataset, DataLoader, Subset
 from torchvision import datasets
@@ -17,7 +19,7 @@ train_data = datasets.MNIST(
 )
 test_data = datasets.MNIST(
     root="../../data/",
-    train=True,
+    train=False,
     download=True,
     transform=transform
 )
@@ -67,6 +69,10 @@ class CustomNetwork:
         self.W = self.W - self.learning_rate * nabla
         loss = self.get_loss(Y_hat)
         self.loss_history.append(loss)
+        """
+        distance = self.gradient_check(self.W, self.X, nabla, )
+        print(f"distance:{distance}")
+        """
         return loss
 
     def test(self, X_test, Y_test):
@@ -86,6 +92,26 @@ class CustomNetwork:
         Y_hat = torch.clamp(Y_hat, min=epsilon, max=1 - epsilon)  # Clamp the predictions to avoid log(0)
         Y = torch.clamp(self.Y, min=epsilon, max=1 - epsilon)
         return -1 * Y @ torch.log(Y_hat) - (1 - Y) @ torch.log(1 - Y_hat)
+
+    def _loss(self, w: torch.Tensor):
+        Y_hat = torch.sigmoid(torch.matmul(self.X, w))
+        return self.get_loss(Y_hat)
+
+    def gradient_check(self, w: torch.Tensor, X, nabla: torch.Tensor):
+        feature_num = len(w)
+        W = w.repeat((feature_num, 1))
+        epsilon = 1e-5
+        Epsilon = torch.eye(feature_num) * epsilon
+
+        def L(Thetas: torch.Tensor, f: Callable):
+            thetas = Thetas.unbind(0)
+            return torch.tensor(list(map(f, thetas)))
+
+        grad = (L(W + Epsilon, self._loss) - L(W - Epsilon, self._loss)) / (2 * epsilon)
+        difference_vector = grad - nabla
+
+        norm_difference = torch.norm(difference_vector) / ((torch.norm(grad) + torch.norm(nabla)) / 2)
+        return norm_difference
 
 
 nn = CustomNetwork(train_images, train_labels, 0.0001)
