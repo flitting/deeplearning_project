@@ -1,7 +1,7 @@
 from typing import Callable
 
 import torch
-from torch.utils.data import Dataset, DataLoader, Subset
+from torch.utils.data import DataLoader
 from torchvision import datasets
 from torchvision import transforms
 import matplotlib.pyplot as plt
@@ -87,7 +87,7 @@ class CustomNetwork:
 
 
 nn = CustomNetwork(train_images, train_labels, 1e-5, label_num)
-epoch = 100
+epoch = 200
 for i in range(epoch):
     epoch_loss = nn.train()
     print(f"training for epoch {i},loss:{epoch_loss}")
